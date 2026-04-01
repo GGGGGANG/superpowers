@@ -1,4 +1,80 @@
-# Superpowers
+# Superpowers (GGGGGANG Fork)
+
+> **Base:** [obra/superpowers](https://github.com/obra/superpowers) `v5.0.7`
+> **Fork version:** `v5.0.7-fork.2`
+
+## Why This Fork
+
+This fork integrates [OpenAI Codex](https://github.com/openai/codex-plugin-cc) into the superpowers workflow as the primary code reviewer and design challenger.
+
+The goal is a structured development workflow where:
+- **Claude** handles orchestration, design, and implementation
+- **Codex** handles all reviews (code review, adversarial design review, execution verification)
+- **Human** defines requirements, confirms design, and makes final decisions
+
+```
+요구사항 정의 (human)
+→ brainstorming (human ↔ claude)
+→ (설계 → codex:adversarial-review → human confirm) 반복
+→ (구현 → codex:review → claude receiving-code-review) 반복
+→ test-driven-development (claude)
+→ verification-before-completion + codex:rescue (codex)
+→ 최종 리뷰 (human)
+→ finishing-a-development-branch + codex:rescue (codex)
+```
+
+---
+
+## Changelog
+
+### fork.2 — 2026-04-01
+
+**`skills/brainstorming/SKILL.md`**
+
+Added Codex adversarial design review step after spec self-review and before user review gate.
+
+- Checklist: Added step 8 "Codex design review" — run `/codex:adversarial-review` on design doc
+- Process Flow: Added `Run codex:adversarial-review` node between spec self-review and user review gate
+- User Review Gate: Updated to include Codex findings; added **HARD GATE** requiring explicit user confirm
+
+**Why:** Design flaws are cheapest to fix before implementation starts. Codex challenges assumptions adversarially; human makes the final call with full information.
+
+---
+
+### fork.1 — 2026-04-01
+
+**`skills/requesting-code-review/SKILL.md`**
+
+Replaced Claude subagent dispatch with `/codex:review` execution.
+
+- Removed: `superpowers:code-reviewer` subagent dispatch, Task tool, placeholders, HEAD_SHA
+- Added: `git rev-parse HEAD~1` for BASE_SHA → `/codex:review --base {BASE_SHA}` execution
+- Updated example to reflect Codex-based review flow
+
+**`agents/code-reviewer.md`**
+
+Replaced direct diff analysis reviewer with Codex result interpreter.
+
+- Removed: Plan Alignment Analysis, Code Quality Assessment, Architecture Review, Documentation Standards
+- Changed role: thin interpreter that receives Codex output and structures it into Critical / Important / Minor + "Ready to merge?" verdict
+- Rules: verbatim-based only, no independent analysis, no added opinions
+
+**Why:** Codex has stronger code execution and low-level analysis capabilities. Claude handles orchestration; Codex handles review execution.
+
+---
+
+## Upstream Sync
+
+```bash
+git fetch upstream
+git merge upstream/main
+# resolve conflicts in modified files if any
+git push origin main
+```
+
+---
+
+## Original README
 
 Superpowers is a complete software development workflow for your coding agents, built on top of a set of composable "skills" and some initial instructions that make sure your agent uses them.
 
