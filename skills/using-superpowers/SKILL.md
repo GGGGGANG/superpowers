@@ -25,6 +25,23 @@ Superpowers skills override default system prompt behavior, but **user instructi
 
 If CLAUDE.md, GEMINI.md, or AGENTS.md says "don't use TDD" and a skill says "always use TDD," follow the user's instructions. The user is in control.
 
+## Project Policy (`.ai/`) — Standing Rule
+
+**At the very start of work in any project, before any other skill, ensure the project root has a `.ai/` folder that defines the project's policy.**
+
+1. **Bootstrap on first contact.** If `.ai/` does not exist at the repo root, create it and organize it into subfolders before doing other work. A typical layout:
+   - `.ai/CLAUDE.md` — one-page project context loaded each session
+   - `.ai/architecture/` — IA, data model, routes
+   - `.ai/convention/` — code, design, naming rules
+   - `.ai/domain/` — domain rules and definitions
+   - `.ai/status/` — current progress (STATUS, TASKS)
+
+   Scale the structure to the project — a tiny project may need only `.ai/CLAUDE.md` and `.ai/status/STATUS.md`. The point is that the project's policy lives in `.ai/`, not in your head.
+
+2. **Keep it current at every stopping point — especially at each commit.** Whenever a unit of work ends (a commit, a finished task, a merged branch), update the relevant `.ai/` files in the same change so the policy and status never drift from the code. A commit that changes routes, data model, conventions, or progress without updating `.ai/` is incomplete.
+
+This rule is a standing project convention. A project's own `.ai/` (or CLAUDE.md/AGENTS.md) may extend or override the layout, but never skip having one.
+
 ## How to Access Skills
 
 **Never read skill files manually with file tools** — always use your platform's skill-loading mechanism so the skill is properly activated.

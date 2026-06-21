@@ -82,6 +82,13 @@ digraph process {
 }
 ```
 
+## Pre-Flight Setup (fork policy)
+
+Before dispatching Task 1:
+
+- **Branch:** Confirm you are on the `dev` branch (`git switch dev`, creating it from the default branch if needed). Never run implementation on `main`/`master`. Do NOT create a worktree or separate workspace — all tasks and commits happen on `dev`.
+- **`.ai/` project policy:** Ensure the repo root has a `.ai/` folder defining the project's policy (context, architecture, conventions, status). If it is missing, create it before Task 1. Tell each implementer subagent to keep the relevant `.ai/` files current in the same commit as their code change.
+
 ## Pre-Flight Plan Review
 
 Before dispatching Task 1, scan the plan once for conflicts:
@@ -367,7 +374,8 @@ Done!
 ## Red Flags
 
 **Never:**
-- Start implementation on main/master branch without explicit user consent
+- Start implementation on the `main`/`master` branch — work on the `dev` branch (fork policy); never create a worktree/separate workspace unless the user explicitly asks
+- Commit a code change that touches routes, data model, conventions, or progress without updating the project's `.ai/` files in the same commit
 - Skip task review, or accept a report missing either verdict (spec compliance AND task quality are both required)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
@@ -406,7 +414,7 @@ Done!
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing)
+- **superpowers:using-git-worktrees** - Fork policy: work on the `dev` branch in place (no worktree/separate workspace); runs project setup + clean test baseline
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:requesting-code-review** - Code review template for the final whole-branch review
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks

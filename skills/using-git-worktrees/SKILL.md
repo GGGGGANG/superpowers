@@ -1,9 +1,25 @@
 ---
 name: using-git-worktrees
-description: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback
+description: Use when starting feature work or before executing implementation plans - this fork works directly on the dev branch (no worktree/separate-workspace isolation), then runs project setup and a clean test baseline in place
 ---
 
 # Using Git Worktrees
+
+<FORK-POLICY>
+**This fork does not isolate work into a separate workspace.** Do NOT create git worktrees and do NOT spin up an isolated copy of the repo.
+
+**Work directly on the `dev` branch:**
+
+```bash
+git rev-parse --verify dev >/dev/null 2>&1 && git switch dev || git switch -c dev
+```
+
+- If `dev` exists, switch to it. If not, create it from the default branch.
+- Never start work on `main`/`master`. All implementation, tasks, and commits happen on `dev` (or a topic branch off `dev` if the user asks for one).
+- Then run **Step 2 (Project Setup)** and **Step 3 (Verify Clean Baseline)** below, in place.
+
+Everything below this block (Step 0, Step 1, worktree detection/creation, the Quick Reference, and worktree Red Flags) is **legacy upstream guidance kept for reference only — skip it.** Honor it only if the user explicitly asks for worktree isolation.
+</FORK-POLICY>
 
 ## Overview
 

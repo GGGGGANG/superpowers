@@ -2,6 +2,34 @@
 
 Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them.
 
+---
+
+## About this fork (GGGGGANG/superpowers)
+
+This is a customized fork of [obra/superpowers](https://github.com/obra/superpowers), synced to upstream **v6.0.3**. It keeps upstream's Claude-subagent methodology and layers a few standing policies on top:
+
+- **Reviews run on Claude subagents.** Code review and the brainstorming design review are dispatched to `general-purpose` Claude subagents — no external review tool (e.g. Codex) in the loop. The brainstorming flow includes an adversarial design review (Claude subagent) before the user gate.
+- **No separate workspace — work on the `dev` branch.** This fork does not create git worktrees or isolated copies. All implementation, tasks, and commits happen directly on the `dev` branch (created from the default branch if missing); never on `main`/`master`.
+- **`.ai/` project policy.** At the very start of work in any project, the agent ensures a `.ai/` folder exists at the repo root defining the project's policy (context, architecture, conventions, status), and keeps it current at every stopping point — especially each commit.
+
+### Changelog (fork)
+
+- **fork-v6.0.3.1** — Re-based on upstream v6.0.3 (drops the old v5.0.7-based Codex commits). Added the dev-branch + `.ai/` policies and the Claude-subagent adversarial design review. Edited skills: `using-superpowers`, `using-git-worktrees`, `subagent-driven-development` (+ implementer prompt), `brainstorming`.
+
+### Staying in sync with upstream
+
+```bash
+git remote add upstream https://github.com/obra/superpowers.git   # once
+git fetch upstream
+git switch dev
+git merge upstream/main          # resolve conflicts in the edited skills above
+git push origin dev
+```
+
+The fork's policy edits are localized to the skills listed in the changelog, so conflicts on sync are confined to those files.
+
+---
+
 
 ## We're Hiring!
 
