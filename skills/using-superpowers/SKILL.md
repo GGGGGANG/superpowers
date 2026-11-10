@@ -153,11 +153,21 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
    Scale the structure to the project — a tiny project may need only `.ai/CLAUDE.md` and `.ai/status/STATUS.md`. The point is that the project's policy lives in `.ai/`, not in your head.
 
-2. **Keep it current at every stopping point — especially at each commit.** Whenever a unit of work ends (a commit, a finished task, a merged branch), update the relevant `.ai/` files in the same change so the policy and status never drift from the code. A commit that changes routes, data model, conventions, or progress without updating `.ai/` is incomplete.
+2. **Wire the entry so it loads every session (fork policy, 2026-11-10).** A `.ai/CLAUDE.md` that nothing imports is never read. Your human partner said "CONTEXT.md 만들어두고, 거기다가 항상 어떤 md들을 참조해야 하는지 간략한 설명, 그리고 @로 링크 걸어둬". On first contact, check and create:
+   - Root `CLAUDE.md` whose only line is `@CONTEXT.md`.
+   - Root `CONTEXT.md`: one line on what the project is, then an "always read" section where each document needed every session gets a one-line description and its own `@path` import line (at least `@.ai/CLAUDE.md`), then an "on demand" table (when to open it | document | what it holds) for the rest, written as backticked paths without `@`.
+   - An `@` import loads the whole file into every session and every subagent, so only small documents get one (status logs, design docs, and scripts of tens of KB stay on demand). A path inside backticks is not imported.
+   - If the project sits in a workspace whose own context file lists its projects (a parent `CONTEXT.md` with a service table), make sure the project has a row there that points at its `CONTEXT.md`.
 
-3. **Route, don't load everything.** Keep always-loaded context small. Rule documents that are not needed every session go in a routing table in the entry file (`.ai/CLAUDE.md` or the project's CLAUDE.md), one row each: **trigger** (a task or path pattern) | **document to read first** | **the one line you must not forget**. When the current work matches a trigger, read that document before writing code or docs, even if nobody asked. When dispatching an implementer or reviewer subagent, apply the table to the paths involved and pass it the resulting document list — subagents do not see the table.
+3. **Keep it current at every stopping point — especially at each commit.** Whenever a unit of work ends (a commit, a finished task, a merged branch), update the relevant `.ai/` files in the same change so the policy and status never drift from the code. A commit that changes routes, data model, conventions, or progress without updating `.ai/` is incomplete.
+
+4. **Route, don't load everything.** Keep always-loaded context small. Rule documents that are not needed every session go in a routing table in the entry file (`.ai/CLAUDE.md`, imported from `CONTEXT.md` as in item 2), one row each: **trigger** (a task or path pattern) | **document to read first** | **the one line you must not forget**. When the current work matches a trigger, read that document before writing code or docs, even if nobody asked. When dispatching an implementer or reviewer subagent, apply the table to the paths involved and pass it the resulting document list — subagents do not see the table.
 
 This rule is a standing project convention. A project's own `.ai/` (or CLAUDE.md/AGENTS.md) may extend or override the layout, but never skip having one.
+
+## Editing These Skills (fork policy, 2026-11-10)
+
+This is your human partner's fork. When you change a superpowers skill, edit the fork clone at `~/.claude/plugins/marketplaces/superpowers-dev`, copy the same files into the active cache (`~/.claude/plugins/cache/superpowers-dev/superpowers/<version>/`), then commit and push in the same turn and see the change into `main` through a PR. Bump the version in `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` and `package.json` and add a line to the README fork changelog: an update compares versions, and a same version never replaces the cache even after new commits. `/reload-plugins` only re-reads what is already on disk; a remote change reaches a machine through the marketplace update (`/plugin`, Update marketplace) or `claude plugin update superpowers@superpowers-dev`. The marketplace installs from the remote `main`, so a change that stays local is overwritten on the next update and never reaches other machines. If your session cannot run git there (a worktree-isolated session), give your partner the one-line `! git -C ...` command right away instead of saving it for the end.
 
 ## Skill Priority
 
