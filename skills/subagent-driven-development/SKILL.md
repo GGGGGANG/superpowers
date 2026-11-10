@@ -54,7 +54,7 @@ digraph when_to_use {
 
 **vs. Executing Plans (inline):**
 - Fresh subagent per task (no context pollution) instead of one context doing every task
-- Review after each task (spec compliance + code quality) instead of only at the end
+- One review per risky chunk of tasks (spec compliance + code quality) instead of only at the end
 - Costs a fresh context per task and per review; inline costs one context plus one final reviewer
 - Both run in this session, share the same plan workspace and ledger, and never pause between tasks
 
@@ -210,6 +210,29 @@ a diff you expect to exceed a few hundred lines. The last chunk may fold into
 the final whole-branch review instead of getting its own review. Judge the
 boundaries yourself and do not ask; record each chunk's reason in the
 ledger.
+
+**Keep reviews and test runs minimal (fork policy, 2026-11-10).** Your
+human partner said "리뷰, 테스트는 항상 최소한으로 진행해" (always keep
+reviews and test runs to the minimum). The tests the plan writes and the
+frozen DoD's criteria already gate every task (RED, GREEN, Gate 2), so a
+review earns its cost only where those tests cannot see the risk:
+
+- Give a chunk its own review only when it carries a risk the tests do not
+  pin: a new screen or input flow a person can get stuck in, a save or
+  data format change, timing or concurrency logic, a security or data-loss
+  surface. Fold a low-risk chunk (deletions, placing assets, plan code
+  transcribed verbatim) into the review of the risky chunk next to it,
+  preferably the one that consumes its output. Six natural chunks usually
+  end as two or three reviews.
+- A chunk that only changes docs, status files, or capture and tooling
+  scripts gets no review; its acceptance criteria, capture comparison, or
+  the Gate 2 verdict is its check. Ledger that as a ruling.
+- Implementers run only the tests their brief names. The full suite runs
+  at the end of each reviewed chunk (tell that chunk's last implementer to
+  run it) and once before finishing, never once per task.
+- Never shrink the tests themselves. The tests the plan writes and the
+  frozen DoD's criteria are the contract; removing one is a Change Request
+  your human partner approves.
 
 Inside a chunk, every task still gets its own brief, its own implementer,
 its own tests, its own commit, and its own ledger line. Only the review
