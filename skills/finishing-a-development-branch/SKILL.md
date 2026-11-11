@@ -130,6 +130,7 @@ conflicts across parallel branches. Generate lists with `grep` instead.
 |---|---|---|
 | Tech debt left by this work | `docs/tech-debt/<kebab-summary>.md` with `status: open` and `source: <slug>` frontmatter | problem, impact, done-when, how to verify |
 | Change to a global rule or process | `docs/changelog/YYYY-MM-DD-<slug>.md` | what changed, which files, **why** |
+| This task's progress | `.ai/status/<slug>.md` (using-superpowers, Work Records) | `state: pr-open <url>` once the PR/MR exists, `## Next` = what the merge still waits on, `## Open` = unchecked items; commit and push it with the branch. After the merge, `state: merged <sha>` |
 
 Resolving a tech-debt item: set `status: resolved` and add one `- Resolved:` line with the
 evidence (PR, commit, gate). Do not delete the file. A project instruction naming other
@@ -206,8 +207,13 @@ understanding-doc block at the top of the PR/MR body:
 
 ```bash
 gh pr create --base <base-branch> --body-file <body.md>                        # GitHub
-glab mr create --target-branch <base-branch> --description "$(cat <body.md>)"  # GitLab
+glab api projects/:id/merge_requests -X POST -F source_branch=<branch> \
+  -F target_branch=<base-branch> -F title="<title>" -F description=@<body.md>  # GitLab
 ```
+
+Pass the body as a file (`--body-file`, `-F description=@file`), never as
+`"$(cat <body.md>)"`: worktree-isolated sessions refuse command substitution,
+and a long body breaks shell quoting.
 
 **No gh/glab installed:** create the PR/MR yourself through the forge's REST API,
 authenticated with the token git already uses for this remote. Never hand the
@@ -285,8 +291,10 @@ Step 2, from before that directory change.
 
 **If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
 
-**If `WORKTREE_PATH` is under `.worktrees/` or `worktrees/`:** Superpowers
-created this worktree — we own cleanup:
+**If `WORKTREE_PATH` is under `.worktrees/` or `worktrees/`, or under
+`.claude/worktrees/` and named on this work's status-file `branch:` line:**
+this work created the worktree — we own cleanup. A project cleanup skill
+(for example `cleanup-worktree`) wins over the commands below:
 
 ```bash
 git worktree remove "$WORKTREE_PATH"
@@ -316,8 +324,17 @@ Which?
 
 Carry out the choice, then remove the worktree.
 
-**Otherwise:** The host environment owns this workspace — leave it in
-place. If your platform provides a workspace-exit tool, use it.
+**Otherwise:** The host environment or another session owns this
+workspace — leave it in place. If your platform provides a workspace-exit
+tool, use it.
+
+**After the PR/MR merges** (Option 2's worktree is kept until then): when
+your partner says it merged, or you see it merged, prove it first —
+`git fetch origin <base>` and `git merge-base --is-ancestor <branch head sha> origin/<base>`.
+Only then remove the worktree as above, delete the local branch
+(`git branch -d`; `-D` only after that ancestry proof, since squash merges
+leave it "not fully merged"), and set the status file to `merged <sha>`.
+Use the project's cleanup skill instead when it has one.
 
 ## Quick Reference
 

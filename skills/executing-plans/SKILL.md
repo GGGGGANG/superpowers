@@ -146,6 +146,12 @@ and the new one resumes from the same ledger.
   `# SDD ledger — plan: <plan file path>`.
 - `git clean -fdx` will destroy the workspace (it's git-ignored scratch);
   if that happens, recover from `git log`.
+- **The ledger never travels; the status file does** (using-superpowers, Work
+  Records). Each `Task <N>: complete` line and each `Ruling:` line also goes
+  into `.ai/status/<slug>.md` (`## Done` / `## Decisions`, and `## Next` set to
+  the following task), in the same commit as the work. With no ledger but a
+  status file — another machine, a wiped workspace — rebuild the ledger from
+  that file and `git log` and resume at `## Next`; it is not a fresh start.
 
 Read the plan once, note its context and Global Constraints, and create a
 todo per task. If the plan names a Spec, read that too: the spec is the
@@ -250,17 +256,17 @@ Run `../subagent-driven-development/scripts/review-package PLAN_FILE MERGE_BASE 
 (MERGE_BASE = the commit the branch started from, e.g.
 `git merge-base main HEAD`) and review from the file it prints.
 
-**With a subagent tool:** dispatch the reviewer on the most capable
-available model — the whole-branch review is a judgment task — using
+**With a subagent tool:** dispatch the project's code-review agent if it
+has one, else a `general-purpose` reviewer (using-superpowers, Subagents and
+Stop Points) — the whole-branch review is a judgment task — using
 superpowers:requesting-code-review's
 [code-reviewer.md](../requesting-code-review/code-reviewer.md), with the
 package path, the plan and spec paths, the plan's Review Focus section
 verbatim if it has one (the input classes and failure modes the plan's
 tests do not exercise — the reviewer checks each deliberately), and a
 pointer to the ledger's `Ruling:` lines so it can weigh the calls you
-made. Specify the model
-explicitly; an omitted model inherits the session's, which may not be the
-most capable. This is the one fresh context the whole run buys. Do not
+made. Do not pass a `model` argument; the agent definition decides. This
+is the one fresh context the whole run buys. Do not
 skip it, and do not replace it with your own read of the diff. If the branch has a contract to keep, dispatch
 [contract-reviewer.md](../requesting-code-review/contract-reviewer.md) in
 parallel with it and settle disagreements by superpowers:requesting-code-review's
@@ -375,7 +381,7 @@ Task 2: Recovery modes
 
 ...
 
-[After all tasks: review-package plan MERGE_BASE HEAD; dispatch code-reviewer, most capable model]
+[After all tasks: review-package plan MERGE_BASE HEAD; dispatch code-reviewer (project agent, its own model)]
 Reviewer: One Important finding — progress reporting interval hardcoded. Two Minor.
 [Re-grade: Important stands; minors → ledger as deferred]
 [Fix pass: test_progress_interval_configurable RED → extract PROGRESS_INTERVAL → GREEN; suite 12/12; commit]
