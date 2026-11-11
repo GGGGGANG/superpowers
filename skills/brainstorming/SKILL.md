@@ -148,13 +148,13 @@ your path and complete them in order.
 **Bounded:**
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, the ones that matter
-3. **Present short design in chat** — approach, files touched, testing
+3. **Present short design in chat** — approach, files touched, testing. Visual work also gets its claude.ai mockup here (using-superpowers, Design Mockups First), and the approval in step 4 covers it
 4. **Get approval** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
 5. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
 
 **Architectural:**
 1. **Explore project context** — check files, docs, recent commits, and the project's `.ai/` policy folder (create `.ai/` if the project root lacks one — see using-superpowers)
-2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
+2. **Show designs as claude.ai mockups**: the first time a screen, layout, component or style is on the table, publish a mockup with the Artifact tool and give the link, with no offer message first (using-superpowers, Design Mockups First). For other visual questions such as architecture diagrams, offer the visual companion just-in-time as before, in its own message. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
@@ -306,6 +306,8 @@ This is a hard gate. Wait for the user's **explicit** confirmation — do not pr
 - Do NOT invoke any other skill. writing-plans is the next step.
 
 ## Visual Companion
+
+**Fork policy (2026-11-10):** design mockups, wireframes and layout options are published to claude.ai with the Artifact tool, without an offer message (using-superpowers, Design Mockups First). This local companion covers designs only in a session without the Artifact tool, and stays available for other visual questions such as architecture diagrams; the offer and per-question rules below apply to those uses.
 
 A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
 

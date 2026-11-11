@@ -169,6 +169,16 @@ This rule is a standing project convention. A project's own `.ai/` (or CLAUDE.md
 
 This is your human partner's fork. When you change a superpowers skill, edit the fork clone at `~/.claude/plugins/marketplaces/superpowers-dev`, copy the same files into the active cache (`~/.claude/plugins/cache/superpowers-dev/superpowers/<version>/`), then commit and push in the same turn and see the change into `main` through a PR. Bump the version in `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` and `package.json` and add a line to the README fork changelog: an update compares versions, and a same version never replaces the cache even after new commits. `/reload-plugins` only re-reads what is already on disk; a remote change reaches a machine through the marketplace update (`/plugin`, Update marketplace) or `claude plugin update superpowers@superpowers-dev`. The marketplace installs from the remote `main`, so a change that stays local is overwritten on the next update and never reaches other machines. If your session cannot run git there (a worktree-isolated session), give your partner the one-line `! git -C ...` command right away instead of saving it for the end.
 
+## Design Mockups First (fork policy, 2026-11-10)
+
+Your human partner said "모든 디자인은 클로드 서버에 시안 띄워서 먼저 보여주고 진행하라고 넣어둬". Work that creates or changes something people look at (a screen, layout, component, style, visual design, slide or page) starts with a mockup on claude.ai, before any code, design file or project file for it is written:
+
+1. Publish the mockup with the Artifact tool (its description says which type and design skill to load first), build it from the project's real tokens and components when they exist, and give your partner the link. When there are real options, put them side by side on one page.
+2. Stop and wait for an explicit approval of that mockup. A change request means republishing to the same URL and asking again.
+3. Implement what was approved. A visible change the approved mockup does not show goes back to step 1.
+
+Small visual changes count, and so does visual work inside brainstorming, a plan or a subagent task: the controller gets the mockup approved before dispatching the implementer and passes the approved link in the brief. If the Artifact tool is not available in the session, say so and show the mockup through the brainstorming visual companion instead; the approval gate stays.
+
 ## Skill Priority
 
 When multiple skills apply, process skills come first — they set the approach, then implementation skills (frontend-design, etc.) carry it out. Brainstorming and systematic-debugging are Superpowers' most common process skills, but the rule holds for any of them.
