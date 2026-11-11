@@ -14,7 +14,7 @@ Execute plan by dispatching a fresh implementer subagent per task, one review (s
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
-**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are the four named below, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are the six named below, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
 **Rulings, not stalls.** A running plan does not wait on a human. Conflicts,
 ambiguities, plan defects, a cap you would have asked to exceed — decide
@@ -24,11 +24,13 @@ judgment settles what neither answers. Record every decision in the ledger as
 going. A wrong ruling costs rework your human partner can see and undo; a
 session parked on a question costs their whole day and buys nothing.
 
-Four things stop you, and only these: an irreversible or destructive
+Six things stop you, and only these: an irreversible or destructive
 operation; a security-sensitive action; a side effect outside this worktree
 that norms say you ask about first (a merge into the base branch, a push to a
-shared branch, a publish); and a plan so broken that every path forward is a
-guess. For those, stop and ask. Pushing the feature branch and opening its
+shared branch, a publish); a plan so broken that every path forward is a
+guess; a review fix loop with findings still open after round 2; and a step
+or agent that still fails after one retry (using-superpowers, Subagents and
+Stop Points). For those, stop and ask. Pushing the feature branch and opening its
 PR/MR at the end is not one of them: finishing-a-development-branch does that
 by default, and the PR/MR is where your human partner approves the merge.
 
@@ -74,14 +76,11 @@ digraph process {
         "Spec ✅ and quality approved?" [shape=diamond];
         "Finding conflicts with plan text?" [shape=diamond];
         "Rule on the conflict, ledger the ruling" [shape=box];
-        "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [shape=box];
+        "Fix round R of 2: R=1 resume implementer; R=2 fresh implementer" [shape=box];
         "Dispatch scoped re-review (./re-review-prompt.md)" [shape=box];
         "All findings addressed?" [shape=diamond];
-        "R = 5?" [shape=diamond];
-        "Adjudicate each open finding" [shape=box];
-        "Any load-bearing finding?" [shape=diamond];
-        "Rule and continue; stop only if every path forward is a guess" [shape=box];
-        "Park findings in ledger with rulings" [shape=box];
+        "R = 2?" [shape=diamond];
+        "Stop: escalate open findings to your partner" [shape=box];
         "Append completion to ledger, mark todo complete" [shape=box];
     }
 
@@ -102,18 +101,15 @@ digraph process {
     "Spec ✅ and quality approved?" -> "Append completion to ledger, mark todo complete" [label="yes"];
     "Spec ✅ and quality approved?" -> "Finding conflicts with plan text?" [label="no"];
     "Finding conflicts with plan text?" -> "Rule on the conflict, ledger the ruling" [label="yes"];
-    "Rule on the conflict, ledger the ruling" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model";
-    "Finding conflicts with plan text?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no"];
-    "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" -> "Dispatch scoped re-review (./re-review-prompt.md)";
+    "Rule on the conflict, ledger the ruling" -> "Fix round R of 2: R=1 resume implementer; R=2 fresh implementer";
+    "Finding conflicts with plan text?" -> "Fix round R of 2: R=1 resume implementer; R=2 fresh implementer" [label="no"];
+    "Fix round R of 2: R=1 resume implementer; R=2 fresh implementer" -> "Dispatch scoped re-review (./re-review-prompt.md)";
     "Dispatch scoped re-review (./re-review-prompt.md)" -> "All findings addressed?";
     "All findings addressed?" -> "Append completion to ledger, mark todo complete" [label="yes"];
-    "All findings addressed?" -> "R = 5?" [label="no"];
-    "R = 5?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no - next round"];
-    "R = 5?" -> "Adjudicate each open finding" [label="yes - breaker trips"];
-    "Adjudicate each open finding" -> "Any load-bearing finding?";
-    "Any load-bearing finding?" -> "Rule and continue; stop only if every path forward is a guess" [label="yes"];
-    "Any load-bearing finding?" -> "Park findings in ledger with rulings" [label="no"];
-    "Park findings in ledger with rulings" -> "Append completion to ledger, mark todo complete";
+    "All findings addressed?" -> "R = 2?" [label="no"];
+    "R = 2?" -> "Fix round R of 2: R=1 resume implementer; R=2 fresh implementer" [label="no - next round"];
+    "R = 2?" -> "Stop: escalate open findings to your partner" [label="yes - breaker trips"];
+    "Stop: escalate open findings to your partner" -> "Append completion to ledger, mark todo complete" [label="partner decides"];
     "Append completion to ledger, mark todo complete" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer (../requesting-code-review/code-reviewer.md)" [label="no"];
@@ -245,7 +241,7 @@ its own tests, its own commit, and its own ledger line. Only the review
 waits: when the chunk's last task reports DONE, generate one review package
 from the chunk's start (the BASE you recorded before its first task) to
 HEAD, and dispatch one reviewer with every brief and every report in the
-chunk. The fix loop, its five rounds, and the completion lines below then
+chunk. The fix loop, its two rounds, and the completion lines below then
 apply to the chunk as a whole. If an implementer inside a chunk reports
 DONE_WITH_CONCERNS about correctness, or BLOCKED, deal with it before the
 next task, exactly as for any task. When the chunk review comes back
@@ -254,6 +250,11 @@ clean, write a completion line for each task in the chunk.
 Wherever the steps below say "task review", read "chunk review".
 
 ## Model Selection
+
+**Do not pass a `model` argument** (using-superpowers, Subagents and Stop
+Points): the dispatched agent's definition decides. The guidance below is for
+writing those definitions, and for the dispatches where your partner asks
+you to choose.
 
 Use the least powerful model that can handle each role to conserve cost and increase speed.
 
@@ -270,12 +271,12 @@ diff's size, complexity, and risk. A small mechanical diff does not need the
 most capable model; a subtle concurrency change does. Scoped re-reviews of
 small fix diffs take a cheap-to-mid tier.
 
-**Fix-loop escalation (rounds 4-5)**: use a model at least one tier above
-the implementer that got stuck.
+**Fix-loop round 2**: a fresh implementer; one tier above the one that got
+stuck only when a project agent definition offers it or your partner names it.
 
-**Always specify the model explicitly when dispatching a subagent.** An
-omitted model inherits your session's model — often the most capable and
-most expensive — which silently defeats this section.
+**An omitted model follows the agent definition.** A `general-purpose`
+dispatch inherits your session's model; when that cost matters, the fix is an
+agent definition with its own `model:`, not a per-call override.
 
 **Turn count beats token price.** Wall-clock and context cost scale with how
 many turns a subagent takes, and the cheapest models routinely take 2-3× the
@@ -366,12 +367,12 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
-1. If it's a context problem, provide more context and re-dispatch with the same model
-2. If the task requires more reasoning, re-dispatch with a more capable model
+1. If it's a context problem, provide more context and re-dispatch the same agent
+2. If the task requires more reasoning, re-dispatch a more capable agent definition if the project has one; otherwise report to your partner, who may name a model
 3. If the task is too large, break it into smaller pieces
 4. If the plan itself is wrong, rule on the correction, ledger it, and re-dispatch with the ruling carried in the dispatch
 
-**Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+That is one retry. If the re-dispatch is BLOCKED again, stop and report to your partner with what was tried — never skip the task. **Never** ignore an escalation or retry without changes. If the implementer said it's stuck, something needs to change.
 
 If the implementer asks questions — before starting or mid-task — answer
 clearly and completely, provide additional context if needed, and don't
@@ -442,20 +443,22 @@ Before the loop starts, two routes leave it immediately:
   the plan mandates it, and do not dispatch a fix that contradicts the plan
   without a recorded ruling.
 Everything else enters the loop. A fix round is one fix dispatch plus one
-scoped re-review. Five rounds maximum per chunk:
+scoped re-review. Two rounds maximum per chunk (using-superpowers, Subagents
+and Stop Points):
 
-**Rounds 1-3 — resume the original implementer.** Send it the open findings
+**Round 1 — resume the original implementer.** Send it the open findings
 verbatim. Its context is intact: it knows the task, the code, and its own
 choices. If your harness cannot send another message to a live subagent,
 dispatch a fresh implementer carrying the brief path, the report-file path,
 and the findings — the report file is the persistent memory either way.
 
-**Rounds 4-5 — dispatch a fresh implementer on a more capable model** (per
-Model Selection), with the brief path, the report-file path, the open
-findings, and this framing: "A prior implementer attempted this task
-[N] times; you own it now. Read the report file for what was tried." A loop
-that survives three resumes usually means the implementer cannot see its
-own problem — fresh eyes and a capability bump in one move.
+**Round 2 — dispatch a fresh implementer** (the same agent definition; a
+more capable one only when the project has it or your partner names a
+model), with the brief path, the report-file path, the open findings, and
+this framing: "A prior implementer attempted this task once; you own it
+now. Read the report file for what was tried." A finding that survives a
+resume usually means the implementer cannot see its own problem — fresh
+eyes are the remaining move.
 
 **Every round, either way:** the implementer fixes, re-runs the tests
 covering the amended code, appends its fix report to the same report file,
@@ -475,29 +478,22 @@ findings list. Out-of-scope observations go to the ledger as deferred
 minors — they never extend the loop.
 
 **After each round,** append to the ledger:
-`Task <N>: fix round <R>/5 (<X> addressed, <Y> open — <finding one-liners>; commits <a7>..<b7>)`
+`Task <N>: fix round <R>/2 (<X> addressed, <Y> open — <finding one-liners>; commits <a7>..<b7>)`
 
 Never fix findings yourself in the controller session — your context stays
 clean for coordination, and controller fixes skip review.
 
-**The breaker.** When round 5's re-review still leaves findings open, stop
-dispatching. Adjudicate each open finding yourself — you hold the plan and
-the cross-task context the reviewer lacks:
+**The breaker.** When round 2's re-review still leaves findings open, stop
+dispatching and escalate to your partner — do not adjudicate them yourself.
+Give each open finding with what both rounds tried, your read of it (reviewer
+wrong or contestable / real but nothing builds on it / real and
+load-bearing), the options and your recommendation. Ledger it as
+`Task <N>: escalated — <finding one-liners>`, put it in the status file's
+`## Open` and `## Next`, and carry out what your partner decides; each of
+their decisions is a ledger `Ruling:` line.
 
-- **The reviewer is wrong, or the point is contestable:** park it —
-  `Task <N>: parked — <finding> — Ruling: <why the code stands>`. The final
-  review sees both sides.
-- **Real, but nothing downstream builds on it:** park it the same way, with
-  a ruling that says it's real and deferred.
-- **Real and load-bearing** — a later task builds on it, or it reveals a
-  plan defect: rule on the smallest change that unblocks the dependent work,
-  ledger it as `Task <N>: Ruling: <finding> — <what you decided and why>`,
-  and carry it into the next task's dispatch. Parking a structural failure
-  silently lets every dependent task build on it. Stop only when the defect
-  leaves every path forward a guess.
-
-Adjudicate only at the cap. Adjudicating earlier to end a loop is
-pre-judging with a different name. Every adjudication is a ledger entry —
+Escalate only at the cap. Ending a loop early by dismissing a finding is
+pre-judging with a different name. Every decision is a ledger entry —
 a silent discard is forbidden.
 
 ### 5. Complete the task
@@ -521,7 +517,8 @@ The final whole-branch review gets a package too: run
 branch started from, e.g. `git merge-base main HEAD`) and include the
 printed path in the final review dispatch, so the final reviewer reads
 one file instead of re-deriving the branch diff with git commands. Dispatch
-on the most capable available model (see Model Selection), using
+the project's code-review agent if it has one (see Model Selection: no
+`model` argument), using
 superpowers:requesting-code-review's
 [code-reviewer.md](../requesting-code-review/code-reviewer.md). Point it at
 the ledger's deferred-minor and parked lines so it can triage which must be
@@ -569,11 +566,11 @@ Use superpowers:finishing-a-development-branch.
 
 | Excuse | Reality |
 |--------|---------|
-| "Close enough on spec compliance" | Reviewer found spec gaps = not done. Fix or hit the cap and adjudicate — those are the only exits. |
+| "Close enough on spec compliance" | Reviewer found spec gaps = not done. Fix, or hit the cap and escalate — those are the only exits. |
 | "I'll fix it myself, dispatching is overhead" | Controller fixes pollute your context and skip review. Resume the implementer. |
-| "One more round will converge" | Past the cap, rounds don't converge — the failure is structural. Adjudicate and route. |
+| "One more round will converge" | Past the cap, rounds don't converge — the failure is structural. Escalate to your partner. |
 | "The reviewer will just find something new anyway" | Scoped re-reviews verify fixes; they cannot wander. New findings on untouched code go to the ledger, not the loop. |
-| "This finding is obviously wrong, I'll drop it" | You adjudicate only at the cap, and every ruling is a ledger entry. Silent discards are forbidden. |
+| "This finding is obviously wrong, I'll drop it" | At the cap your partner decides, and every decision is a ledger entry. Silent discards are forbidden. |
 | "The fix was small, skip the re-review" | Unreviewed fixes are how regressions land. Every round ends with a scoped re-review. |
 | "Reviews slow the loop down" | The loop without reviews is just unverified churn. Reviews are the loop's brakes and steering. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Controllers without one have re-dispatched entire completed task sequences. |
@@ -633,13 +630,13 @@ Re-reviewer: Missing progress reporting — ADDRESSED (src/recovery.js:41).
   Magic number — ADDRESSED (src/recovery.js:7). New breakage: none.
   Verdict: all findings addressed.
 
-[Ledger: Task 2: fix round 1/5 (2 addressed, 0 open; commits d4e5f6a..b7c8d9e)]
+[Ledger: Task 2: fix round 1/2 (2 addressed, 0 open; commits d4e5f6a..b7c8d9e)]
 [Ledger: Task 2: complete (commits d4e5f6a..b7c8d9e, review clean)]
 
 ...
 
 [After all tasks]
-[Run review-package PLAN_FILE MERGE_BASE HEAD; dispatch final code-reviewer, most capable model]
+[Run review-package PLAN_FILE MERGE_BASE HEAD; dispatch final code-reviewer (project agent, its own model)]
 Final reviewer: All requirements met. Deferred minors triaged: none block merge.
 
 [Delete this plan's workspace — the record now lives in git]
