@@ -58,8 +58,11 @@ allowed while those prerequisites remain incomplete.
 ## Re-entry Check (read-only, before anything is written)
 
 Before classifying, look for this topic's work directory, `docs/work/<slug>/`
-(`<slug>` is the branch slug). Only read — `ls` and `cat`. Two axes decide:
-does the directory exist, and is the request inside the scope already agreed?
+(`<slug>` is the branch slug), and its status file `.ai/status/<slug>.md`
+(using-superpowers, Work Records). Only read — `ls` and `cat`. The status
+file's `## Next` names the interrupted stage; trust it and `git log` over your
+recollection. Two axes decide: does the directory exist, and is the request
+inside the scope already agreed?
 
 | Observed | Verdict | Entry point |
 |---|---|---|
@@ -158,7 +161,7 @@ your path and complete them in order.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/work/<slug>/design.md` (`<slug>` = branch slug; the plan, DoD, and understanding doc join it there) and commit
+6. **Write design doc** — save to `docs/work/<slug>/design.md` (`<slug>` = branch slug; the plan, DoD, and understanding doc join it there), create or update `.ai/status/<slug>.md` (state, `## Next`, decisions so far — using-superpowers, Work Records), and commit both
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **Adversarial design review (Claude subagent)** — dispatch a fresh `general-purpose` subagent with [spec-document-reviewer-prompt.md](spec-document-reviewer-prompt.md) to challenge the design before the user gate; fix the findings inline (see below)
 9. **User reviews written spec** — ask user to review the spec file before proceeding

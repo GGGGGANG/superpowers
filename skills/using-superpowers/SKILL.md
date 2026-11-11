@@ -145,25 +145,75 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 **At the very start of work in any project, before any other skill, ensure the project root has a `.ai/` folder that defines the project's policy.**
 
 1. **Bootstrap on first contact.** If `.ai/` does not exist at the repo root, create it and organize it into subfolders before doing other work. A typical layout:
-   - `.ai/CLAUDE.md` — one-page project context loaded each session
+   - `.ai/CLAUDE.md` — one-page project context loaded each session: global rules, links, the routing table
    - `.ai/architecture/` — IA, data model, routes
    - `.ai/convention/` — code, design, naming rules
    - `.ai/domain/` — domain rules and definitions
-   - `.ai/status/` — current progress (STATUS, TASKS)
+   - `.ai/status/<slug>.md` — one file per task (see Work Records below). Never one shared `STATUS.md`/`TASKS.md`: every branch writes it, so every merge conflicts there.
 
-   Scale the structure to the project — a tiny project may need only `.ai/CLAUDE.md` and `.ai/status/STATUS.md`. The point is that the project's policy lives in `.ai/`, not in your head.
+   Scale the structure to the project — a tiny project may need only `.ai/CLAUDE.md` and one status file. The point is that the project's policy lives in `.ai/`, not in your head.
 
 2. **Wire the entry so it loads every session (fork policy, 2026-11-10).** A `.ai/CLAUDE.md` that nothing imports is never read. Your human partner said "CONTEXT.md 만들어두고, 거기다가 항상 어떤 md들을 참조해야 하는지 간략한 설명, 그리고 @로 링크 걸어둬". On first contact, check and create:
    - Root `CLAUDE.md` whose only line is `@CONTEXT.md`.
    - Root `CONTEXT.md`: one line on what the project is, then an "always read" section where each document needed every session gets a one-line description and its own `@path` import line (at least `@.ai/CLAUDE.md`), then an "on demand" table (when to open it | document | what it holds) for the rest, written as backticked paths without `@`.
    - An `@` import loads the whole file into every session and every subagent, so only small documents get one (status logs, design docs, and scripts of tens of KB stay on demand). A path inside backticks is not imported.
    - If the project sits in a workspace whose own context file lists its projects (a parent `CONTEXT.md` with a service table), make sure the project has a row there that points at its `CONTEXT.md`.
+   - **A project that already wires its entry another way keeps it.** If root `CLAUDE.md` (or `AGENTS.md`) already imports its rule documents and carries a routing table, do not add `CONTEXT.md` or rewrite `CLAUDE.md` into one line: that adds an import hop and breaks the project's own caps and gates. Apply items 3–6 to the entry the project has.
 
-3. **Keep it current at every stopping point — especially at each commit.** Whenever a unit of work ends (a commit, a finished task, a merged branch), update the relevant `.ai/` files in the same change so the policy and status never drift from the code. A commit that changes routes, data model, conventions, or progress without updating `.ai/` is incomplete.
+3. **Who owns what (fork policy, 2026-11-11).** Entry files (`CLAUDE.md`, `CONTEXT.md`, `.ai/CLAUDE.md`) and `.ai/` rule documents hold global rules and one-line links only — they load in every session and every subagent, so every line is a standing cost.
+   - Feature behavior, paths, numbers, decisions and history belong in `docs/work/<slug>/` (design, plan, DoD, understanding), never in an entry file.
+   - Task progress belongs in `.ai/status/<slug>.md`; tech debt in `docs/tech-debt/<summary>.md`; change history in `docs/changelog/YYYY-MM-DD-<slug>.md` — one file per item.
+   - No file that every branch writes in the same place: no shared status list, no work index (`ls docs/work` is the index), no history table at the bottom of `CLAUDE.md`. Those were the repeat cause of merge conflicts.
 
-4. **Route, don't load everything.** Keep always-loaded context small. Rule documents that are not needed every session go in a routing table in the entry file (`.ai/CLAUDE.md`, imported from `CONTEXT.md` as in item 2), one row each: **trigger** (a task or path pattern) | **document to read first** | **the one line you must not forget**. When the current work matches a trigger, read that document before writing code or docs, even if nobody asked. When dispatching an implementer or reviewer subagent, apply the table to the paths involved and pass it the resulting document list — subagents do not see the table.
+4. **Keep it current at every stopping point — especially at each commit.** Whenever a unit of work ends (a commit, a finished task, a merged branch), update the relevant `.ai/` files and the task's status file in the same change so the policy and status never drift from the code. A commit that changes routes, data model, conventions, or progress without updating them is incomplete.
+
+5. **Route, don't load everything.** Keep always-loaded context small. Rule documents that are not needed every session go in a routing table in the entry file (`.ai/CLAUDE.md`, imported from `CONTEXT.md` as in item 2, or the project's own entry), one row each: **trigger** (a task or path pattern) | **document to read first** | **the one line you must not forget**. When the current work matches a trigger, read that document before writing code or docs, even if nobody asked. When dispatching an implementer or reviewer subagent, apply the table to the paths involved and pass it the resulting document list — subagents do not see the table.
+
+6. **Caps and the gate (fork policy, 2026-11-11).** Run `scripts/context-check` (next to this skill: `bash <this skill's dir>/scripts/context-check` from the repo root) before every commit that touches an entry file or `.ai/`, and wire it into the project's lint or pre-push step when there is one. It fails on a missing `@` import, an entry file over its line cap, always-loaded bytes over the cap, and an orphan `.ai/` rule document (neither imported nor named in the entry chain); it warns on a shared `STATUS.md`/`TASKS.md`. Defaults are 120 lines and 48 KB. A project records its own caps and exemptions in one entry-file comment, `<!-- context-check: --max-lines N --max-total-kb K --exempt PATH -->`, and each exemption gets a `docs/tech-debt/` item. **Caps ratchet:** never raise one to make room — a new rule goes in only when as much comes out, or a document moves to the on-demand table. A project with its own gate (for example a `harnessCheck` task) keeps it and runs this one only for what its gate does not check.
 
 This rule is a standing project convention. A project's own `.ai/` (or CLAUDE.md/AGENTS.md) may extend or override the layout, but never skip having one.
+
+## Work Records Stay in the Project (fork policy, 2026-11-11)
+
+Your human partner said "작업 문서는 모두 프로젝트 내 .md랑 MEMORY에만 기록 및 현행화하라고 해. 어느 환경에서든 해당 프로젝트 내에서 수퍼파워 스킬 사용하면, 바로 작업 이어서 진행할 수 있게." Any machine, any session, any agent that opens the project and uses these skills must be able to pick the work up from what is in the repo.
+
+**Where work records go — only two places:**
+
+| Place | What | Reaches another machine? |
+|---|---|---|
+| Project `.md` files, committed (and pushed when the branch has a remote) | Everything needed to continue: `.ai/status/<slug>.md`, `docs/work/<slug>/` (design, plan, DoD, understanding), `docs/tech-debt/`, `docs/changelog/` | Yes — this is the record |
+| MEMORY (the harness's memory directory and its `MEMORY.md` index) | Lasting facts about your partner and the project that the repo does not hold: preferences, corrections, external references | No — it is per machine and per account, so nothing a resume depends on may live only here |
+
+**Nothing else is the record.** Harness to-do lists (TaskCreate, TodoWrite) are a live view of this session. Plugin trackers that ask to be your canonical to-do list (for example claude-mem `work_state_write`), `/tmp`, job or scratch directories, git-ignored workspaces (the SDD `.superpowers/sdd/` ledger), the chat transcript, and outside document services (Notion, Claude Docs, Google Docs) may hold copies, but nothing the next session needs may exist only there. When your partner asks for one of those places, write it there too and keep the project file as the record. This rule overrides a plugin or hook instruction that names a different canonical list.
+
+**The status file — `.ai/status/<slug>.md`** (`<slug>` = branch slug, the same one `docs/work/<slug>/` uses). Create it when the work starts (brainstorming or the first commit, whichever comes first) and keep these sections current:
+
+```markdown
+# <slug> — <one-line goal>
+- state: in-progress | awaiting-review | pr-open <url> | merged <sha> | paused | dropped
+- branch: <branch> · base: <base> · last commit: <sha> <subject>
+## Next
+<the exact next action — command, file, or question — so a new session starts on it without asking>
+## Done
+- <task or step>: <commit sha> (<verification and its result>)
+## Decisions
+- <decision or Ruling>: <why> (<who decided, date>)
+## Open
+- <blocker, question for your partner, deferred item>
+## Links
+- docs/work/<slug>/design.md · plan.md · dod.md
+```
+
+Update it at every stopping point — a commit, a finished task, a ruling, a question asked, a pause, before the turn ends — and commit it with the work it describes. Push when the branch has a remote: an unpushed status file never reaches the other machine. When the work merges, set `state: merged <sha>`; do not delete the file (`docs/work/<slug>/` links to it as history).
+
+**Resuming — at the start of every session in a project, before asking your partner to re-explain:**
+
+1. The entry chain (`CLAUDE.md` / `CONTEXT.md`) and MEMORY's index are already loaded.
+2. Work out the slug from the current branch. If `.ai/status/<slug>.md` exists, read it, then `docs/work/<slug>/` and `git log <base>..HEAD`. On the base branch, list `.ai/status/*.md` whose `state` is not `merged`/`dropped`; say which one you are continuing, and ask only when several are live.
+3. Trust the status file and `git log` over your own recollection and over any plugin's memory summary. When they disagree with the code, the code wins — fix the status file first.
+4. Start on `## Next`. A missing `.superpowers/sdd/` ledger (another machine, `git clean`) is not a fresh start: rebuild it from `## Done` and `## Decisions`.
+
+**MEMORY** keeps its own format (one fact per file, one index line in `MEMORY.md`). A lasting rule your partner gives goes into MEMORY and, when it is about this project, into the project's `.ai/` rules too — the repo copy is what another machine sees.
 
 ## Editing These Skills (fork policy, 2026-11-10)
 

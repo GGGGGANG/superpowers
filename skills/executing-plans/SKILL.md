@@ -146,6 +146,12 @@ and the new one resumes from the same ledger.
   `# SDD ledger — plan: <plan file path>`.
 - `git clean -fdx` will destroy the workspace (it's git-ignored scratch);
   if that happens, recover from `git log`.
+- **The ledger never travels; the status file does** (using-superpowers, Work
+  Records). Each `Task <N>: complete` line and each `Ruling:` line also goes
+  into `.ai/status/<slug>.md` (`## Done` / `## Decisions`, and `## Next` set to
+  the following task), in the same commit as the work. With no ledger but a
+  status file — another machine, a wiped workspace — rebuild the ledger from
+  that file and `git log` and resume at `## Next`; it is not a fresh start.
 
 Read the plan once, note its context and Global Constraints, and create a
 todo per task. If the plan names a Spec, read that too: the spec is the

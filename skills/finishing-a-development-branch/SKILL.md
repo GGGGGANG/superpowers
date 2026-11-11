@@ -130,6 +130,7 @@ conflicts across parallel branches. Generate lists with `grep` instead.
 |---|---|---|
 | Tech debt left by this work | `docs/tech-debt/<kebab-summary>.md` with `status: open` and `source: <slug>` frontmatter | problem, impact, done-when, how to verify |
 | Change to a global rule or process | `docs/changelog/YYYY-MM-DD-<slug>.md` | what changed, which files, **why** |
+| This task's progress | `.ai/status/<slug>.md` (using-superpowers, Work Records) | `state: pr-open <url>` once the PR/MR exists, `## Next` = what the merge still waits on, `## Open` = unchecked items; commit and push it with the branch. After the merge, `state: merged <sha>` |
 
 Resolving a tech-debt item: set `status: resolved` and add one `- Resolved:` line with the
 evidence (PR, commit, gate). Do not delete the file. A project instruction naming other
