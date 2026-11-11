@@ -157,7 +157,7 @@ your path and complete them in order.
 
 **Architectural:**
 1. **Explore project context** — check files, docs, recent commits, and the project's `.ai/` policy folder (create `.ai/` if the project root lacks one — see using-superpowers)
-2. **Show designs as claude.ai mockups**: the first time a screen, layout, component or style is on the table, publish a mockup with the Artifact tool and give the link, with no offer message first (using-superpowers, Design Mockups First). For other visual questions such as architecture diagrams, offer the visual companion just-in-time as before, in its own message. See the Visual Companion section below.
+2. **Show designs as claude.ai mockups**: the first time a screen, layout, component or style is on the table, publish a mockup with the Artifact tool and give the link, with no offer message first (using-superpowers, Design Mockups First). When exploring the project means analyzing how an existing structure works, publish its 업무 흐름도 and 시스템 아키텍처 page the same way (using-superpowers, Analysis Diagrams on claude.ai). For other visual questions such as a proposed architecture, offer the visual companion just-in-time as before, in its own message. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
@@ -310,7 +310,7 @@ This is a hard gate. Wait for the user's **explicit** confirmation — do not pr
 
 ## Visual Companion
 
-**Fork policy (2026-11-10):** design mockups, wireframes and layout options are published to claude.ai with the Artifact tool, without an offer message (using-superpowers, Design Mockups First). This local companion covers designs only in a session without the Artifact tool, and stays available for other visual questions such as architecture diagrams; the offer and per-question rules below apply to those uses.
+**Fork policy (2026-11-10):** design mockups, wireframes and layout options are published to claude.ai with the Artifact tool, without an offer message (using-superpowers, Design Mockups First). This local companion covers designs only in a session without the Artifact tool, and stays available for other visual questions such as a proposed architecture (diagrams of an existing structure you analyzed go to claude.ai under Analysis Diagrams on claude.ai); the offer and per-question rules below apply to those uses.
 
 A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
 
