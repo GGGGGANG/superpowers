@@ -48,6 +48,10 @@ Subagent (general-purpose):
     커밋 메시지는 한국어로 쓰고, AI 작성 트레일러(`Co-Authored-By: Claude`,
     `🤖 Generated with ...` 등)는 절대 넣지 않는다.
 
+    서버 코드를 다루면 superpowers:writing-traceable-logs 를 따른다. 요청과 응답 로그,
+    외부 연계(SMS, 알림톡, 이메일, 푸시, 외부 API) 호출 로그, 개인정보 마스킹과
+    접속기록을 빠뜨리지 않는다.
+
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
 

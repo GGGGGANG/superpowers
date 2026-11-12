@@ -262,6 +262,12 @@ This overrides the Artifact tool's default of answering in the terminal when nob
 
 If the Artifact tool is not available, write the same HTML file (under `docs/work/<slug>/` when the work has a slug, otherwise the session scratch directory), give its path, and say that publishing was not possible.
 
+## Server Logging (fork policy, 2026-11-12)
+
+Your human partner said "서버에서는 모든 요청,응답에 대한 추적 가능한 로깅을 남기고, 외부 연계(SMS,알림톡,EMAIL,외부APICall) 등 그리고 개인정보(마스킹) 관련해서 추적 가능한 로그를 남기라고 명시해둬".
+
+Any server work (HTTP handlers, background jobs, calls to SMS, 알림톡, email, push or external APIs, code that touches personal information) follows **REQUIRED SUB-SKILL: superpowers:writing-traceable-logs**, in design, plan, implementation and review alike. Specs and plans name the request id, call logging, masking and access-record work their change needs. Implementer and reviewer briefs for server code name the skill, because subagents do not see this section.
+
 ## Skill Priority
 
 When multiple skills apply, process skills come first — they set the approach, then implementation skills (frontend-design, etc.) carry it out. Brainstorming and systematic-debugging are Superpowers' most common process skills, but the rule holds for any of them.

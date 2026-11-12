@@ -94,6 +94,11 @@ Subagent (general-purpose):
     - Documentation complete?
     - No obvious bugs?
 
+    **Server logging (superpowers:writing-traceable-logs), for server code:**
+    - Every new endpoint, job and outside call (SMS, 알림톡, email, push, external API) carries the request id and writes its log line?
+    - No personal information unmasked in logs, exception messages or error responses?
+    - Operator or admin access to personal data writes an access record?
+
     ## Calibration
 
     Categorize issues by actual severity. Not everything is Critical.
