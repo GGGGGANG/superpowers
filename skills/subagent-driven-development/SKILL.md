@@ -5,7 +5,7 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching a fresh implementer subagent per task, one review (spec compliance + code quality) per chunk of related tasks, and a broad whole-branch review at the end.
+Execute plan by dispatching a fresh implementer subagent per task (one for a run of small related tasks), one review (spec compliance + code quality) per chunk of related tasks, and a broad whole-branch review at the end.
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
@@ -230,15 +230,24 @@ review earns its cost only where those tests cannot see the risk:
   scripts gets no review; its acceptance criteria, capture comparison, or
   the Gate 2 verdict is its check. Ledger that as a ruling.
 - Implementers run only the tests their brief names. The full suite runs
-  at the end of each reviewed chunk (tell that chunk's last implementer to
-  run it) and once before finishing, never once per task.
+  at the end of each reviewed chunk and once before finishing, never once
+  per task.
+- Run that full suite yourself, in the background, in the same turn you
+  dispatch the chunk's reviewer (fork policy, 2026-11-14). The reviewer
+  only reads, so neither waits for the other; an implementer told to run
+  the suite holds the whole loop for as long as the suite takes. Dispatch
+  no implementer into that working tree until the suite reports: its
+  edits would change what the suite measures. A suite failure joins the
+  review's findings in the same fix round. The run before finishing goes
+  alongside the final whole-branch review the same way.
 - Never shrink the tests themselves. The tests the plan writes and the
   frozen DoD's criteria are the contract; removing one is a Change Request
   your human partner approves.
 
-Inside a chunk, every task still gets its own brief, its own implementer,
-its own tests, its own commit, and its own ledger line. Only the review
-waits: when the chunk's last task reports DONE, generate one review package
+Inside a chunk, every task still gets its own brief, its own tests, its
+own commit, and its own ledger line, and its own implementer unless it
+shares one with its small neighbors (The Task Loop, "One implementer for
+a run of small tasks"). Only the review waits: when the chunk's last task reports DONE, generate one review package
 from the chunk's start (the BASE you recorded before its first task) to
 HEAD, and dispatch one reviewer with every brief and every report in the
 chunk. The fix loop, its two rounds, and the completion lines below then
@@ -301,6 +310,27 @@ its change, send the whole batch to a single subagent, and review its diff
 as one unit. Reserve one-dispatch-per-task for work that needs its own
 judgment, its own tests, or its own review surface.
 
+**One implementer for a run of small tasks (fork policy, 2026-11-14).**
+Your human partner said "task마다 그렇게 오래 걸릴 작업은 아닌 것 같은데"
+(no single task is big enough to take that long). A fresh implementer
+reads the same instructions, project rules and surrounding code before it
+writes a line, so a small task dispatched alone is mostly start-up. When
+consecutive tasks are each small and edit the same files or the same
+subsystem, dispatch ONE implementer for the run:
+
+- name every task's brief, in order, and state the decisions from earlier
+  tasks once
+- each task keeps its own tests, its own commit, and its own section in
+  one report file; write one ledger line per task from that report
+- the implementer stops at the first task it cannot finish, leaves the
+  earlier commits in place, and reports what it left uncommitted
+
+A task that is large or risky by itself (one that would stand alone as a
+review chunk) keeps its own implementer, and so does a task that shares
+neither a file nor a subsystem with the tasks next to it. A run stays
+inside one review chunk. Decide the runs when you write the review
+chunks, and record them in the ledger.
+
 Everything you paste into a dispatch prompt — and everything a subagent
 prints back — stays resident in your context for the rest of the session
 and is re-read on every later turn. Hand artifacts over as files.
@@ -360,7 +390,7 @@ Template: [implementer-prompt.md](implementer-prompt.md)
 
 Implementer subagents report one of four statuses. Handle each appropriately:
 
-**DONE:** Generate the review package (`bash scripts/review-package PLAN_FILE BASE HEAD`, from this skill's directory — it prints the unique file path it wrote; BASE is the commit you recorded before dispatching the implementer — never `HEAD~1`, which silently drops all but the last commit of a multi-commit task), then dispatch the task reviewer with the printed path. Do this only when the task closes its chunk (see Review Chunks); otherwise record the task's commits in the ledger and dispatch the next task in the chunk.
+**DONE:** Generate the review package (`bash scripts/review-package PLAN_FILE BASE HEAD`, from this skill's directory — it prints the unique file path it wrote; BASE is the commit you recorded before dispatching the implementer — never `HEAD~1`, which silently drops all but the last commit of a multi-commit task), then dispatch the task reviewer with the printed path and, in the same turn, start the full suite in the background (see Review Chunks). Do this only when the task closes its chunk; otherwise record the task's commits in the ledger and dispatch the next task in the chunk.
 
 **DONE_WITH_CONCERNS:** The implementer completed the work but flagged doubts. Read the concerns before proceeding. If the concerns are about correctness or scope, address them before review. If they're observations (e.g., "this file is getting large"), note them and proceed to review.
 
@@ -575,6 +605,8 @@ Use superpowers:finishing-a-development-branch.
 | "Reviews slow the loop down" | The loop without reviews is just unverified churn. Reviews are the loop's brakes and steering. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Controllers without one have re-dispatched entire completed task sequences. |
 | "The implementer spawned its own reviewer — free extra assurance" | It's a duplicate seat reviewing the same diff; the task review is the gate. A worker-spawned reviewer is a defect to flag, not rigor. |
+| "Every task deserves its own fresh implementer" | A small task dispatched alone is mostly start-up reading. A run of small tasks on the same files shares one implementer; each task keeps its own tests and commit. |
+| "The chunk's last implementer can run the full suite" | That holds the loop for the suite's whole duration. Run it yourself in the background while the reviewer reads. |
 | "I'll update `.ai/` later, in one pass" | A commit touching routes, data model, conventions, or progress without its `.ai/` update is incomplete. Same commit, every time. |
 
 ## Example Workflow
