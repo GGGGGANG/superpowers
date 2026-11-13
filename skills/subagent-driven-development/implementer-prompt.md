@@ -57,8 +57,9 @@ Subagent (general-purpose):
 
     While iterating, run the focused test for what you're changing. Before
     committing, run the tests your brief names. Run the full suite only when
-    the dispatch says this task closes a review chunk; test runs are kept
-    to the minimum (fork policy, 2026-11-10).
+    the dispatch tells you to (the controller normally runs it itself
+    while the chunk is reviewed); test runs are kept to the minimum (fork
+    policy, 2026-11-10).
 
     ## You Do Not Dispatch Subagents
 
